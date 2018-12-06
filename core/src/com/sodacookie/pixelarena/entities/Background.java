@@ -45,7 +45,7 @@ public class Background implements Entity {
 		
 		for(int i = 0; i < layers.size(); i++) {
 			
-			layers.get(i).x = move*i*0.05f;
+			layers.get(i).x = move*(layers.size()-i-1)*0.1f;
 			
 		}
 		
