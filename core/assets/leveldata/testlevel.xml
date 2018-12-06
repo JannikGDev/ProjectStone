@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level backdropOffset="0" width="800" height="600">
+
+	<lowerbound x="0"	y="0"/>
+	<upperbound x="800" 	y="600"/>
+
+  <plattform x="305" y="205" width="90" height="90" rotation="0" hookable="false"/>
+  
+  <entry x="125" y="225" id="0"/>
+</level>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level backdropOffset="0" width="800" height="600">
+
+  <plattform x="0" y="0" width="300" height="200" rotation="0" hookable="false"/>
+  <plattform x="0" y="0" width="1000" height="50" rotation="0" hookable="false"/>
+  <plattform x="240" y="5" width="400" height="100" rotation="-30" hookable="false"/>
+  <plattform x="0" y="590" width="800" height="10" rotation="0" hookable="false"/>
+  <plattform x="0" y="0" width="100" height="600" rotation="0" hookable="false"/>
+  <plattform x="790" y="150" width="10" height="550" rotation="0" hookable="false"/>
+  
+  <entry x="125" y="225" id="0"/>
+  <entry x="790" y="50" id="1"/>
+  
+  <exit  x="800" y="0" width="100" height="600" nextLevel="1" entry="0" id="0" />
+</level>
