@@ -31,9 +31,11 @@ public class StonePlayer implements Entity {
 	public Body body;
 
 	public Sprite sprite;
-	public Sprite eyeSprite;
+	public Sprite eyeLSprite;
+	public Sprite eyeRSprite;
 	public Sprite mouthSprite;
-
+	public Sprite mouthShadowSprite;
+	public Sprite browSprite;
 	public Joint ropeJoint;
 
 	float boostCounter;
@@ -46,12 +48,19 @@ public class StonePlayer implements Entity {
 	float mouthOffsetY = 20;
 	float mouthScale = 0.3f;
 	
+	float browOffsetY = -5;
+	
 	Vector2 eyeTarget;
 	
 	TextureRegion stone;
-	TextureRegion eye;
-	TextureRegion eyeOuch;
-	TextureRegion mouth;
+	TextureRegion[] eyeL;
+	TextureRegion[] eyeR;
+	TextureRegion[] mouth;
+	TextureRegion[] brow;
+	
+	int mouthIndex;
+	int eyeIndex;
+	int browIndex;
 	
 	boolean ouch;
 	int ouchCounter;
@@ -62,7 +71,17 @@ public class StonePlayer implements Entity {
 
 		this.game = game;
 		this.world = world;
-
+		this.mouthIndex = 0;
+		this.eyeIndex = 0;
+		this.browIndex = 0;
+		
+		mouth = new TextureRegion[15];
+		brow = new TextureRegion[6];
+		eyeL  = new TextureRegion[14];
+		eyeR  = new TextureRegion[14];
+		
+		
+		
 		// First we create a body definition
 		BodyDef bodyDef = new BodyDef();
 
@@ -110,23 +129,31 @@ public class StonePlayer implements Entity {
 
 		stone = new TextureRegion(game.assets.getTexture("stone.png"));
 		
-		eye = new TextureRegion(game.assets.getTexture("eye.png"));
-		
-		mouth = new TextureRegion(game.assets.getTexture("mouth.png"));
-		
-		eyeOuch = new TextureRegion(game.assets.getTexture("eyeOuch.png"));
+		loadFaceSprites();
 		
 		sprite = new Sprite(game, stone, x, y, width, height);
 		sprite.originX = sprite.width/2f;
 		sprite.originY = sprite.height/2f;
 		
-		eyeSprite = new Sprite(game, eye, x, y, eye.getRegionWidth(), eye.getRegionHeight());
-		eyeSprite.originX = eyeSprite.width/2f;
-		eyeSprite.originY = eyeSprite.height/2f;
+		eyeLSprite = new Sprite(game, eyeL[eyeIndex], x, y, eyeL[eyeIndex].getRegionWidth(), eyeL[eyeIndex].getRegionHeight());
+		eyeLSprite.originX = eyeLSprite.width/2f;
+		eyeLSprite.originY = eyeLSprite.height/2f;
 		
-		mouthSprite = new Sprite(game, mouth, x, y, mouth.getRegionWidth(), mouth.getRegionHeight());
+		eyeRSprite = new Sprite(game, eyeR[eyeIndex], x, y, eyeR[eyeIndex].getRegionWidth(), eyeR[eyeIndex].getRegionHeight());
+		eyeRSprite.originX = eyeRSprite.width/2f;
+		eyeRSprite.originY = eyeRSprite.height/2f;
+		
+		mouthSprite = new Sprite(game, mouth[mouthIndex], x, y, mouth[mouthIndex].getRegionWidth(), mouth[mouthIndex].getRegionHeight());
 		mouthSprite.originX = mouthSprite.width/2f;
 		mouthSprite.originY = mouthOffsetY;
+		
+		mouthShadowSprite = new Sprite(game, mouth[3], x, y, mouth[3].getRegionWidth(), mouth[3].getRegionHeight());
+		mouthShadowSprite.originX = mouthShadowSprite.width/2f;
+		mouthShadowSprite.originY = mouthOffsetY;
+		
+		browSprite = new Sprite(game, brow[browIndex], x, y, brow[browIndex].getRegionWidth(), brow[browIndex].getRegionHeight());
+		browSprite.originX = browSprite.width/2f;
+		browSprite.originY = browOffsetY;
 		
 		int mouseX = (int) (Gdx.input.getX() + game.camera.position.x - game.WIDTH / 2f);
 		int mouseY = (int) (game.HEIGHT - Gdx.input.getY() + game.camera.position.y - game.HEIGHT / 2f);
@@ -140,42 +167,14 @@ public class StonePlayer implements Entity {
 	@Override
 	public void update(float delta) {
 
-		if (Gdx.input.isKeyPressed(Keys.Q) && body.getAngularVelocity() < 2) {
+		if (Gdx.input.isKeyPressed(Keys.A) && body.getAngularVelocity() < 3) {
 
 			body.applyTorque(100 * delta, true);
 		}
 
-		if (Gdx.input.isKeyPressed(Keys.E) && body.getAngularVelocity() > -2) {
+		if (Gdx.input.isKeyPressed(Keys.D) && body.getAngularVelocity() > -3) {
 
 			body.applyTorque(-100 * delta, true);
-		}
-
-		if (boostCounter <= 0) {
-			if (Gdx.input.isKeyPressed(Keys.W)) {
-
-				body.applyForceToCenter(new Vector2(0, 100), true);
-				boostCounter = boostDelay;
-			}
-
-			if (Gdx.input.isKeyPressed(Keys.A)) {
-				
-				body.applyForceToCenter(new Vector2(-100, 0), true);
-				boostCounter = boostDelay;
-			}
-
-			if (Gdx.input.isKeyPressed(Keys.S)) {
-
-				body.applyForceToCenter(new Vector2(0, -100), true);
-				boostCounter = boostDelay;
-			}
-
-			if (Gdx.input.isKeyPressed(Keys.D)) {
-
-				body.applyForceToCenter(new Vector2(100, 0), true);
-				boostCounter = boostDelay;
-			}
-		} else {
-			boostCounter -= delta;
 		}
 
 		sprite.x = body.getPosition().x * game.PHYSICS_ZOOM;
@@ -196,12 +195,12 @@ public class StonePlayer implements Entity {
 		
 		if(damping > 2.5f || body.getAngularVelocity() > 12.0f) {
 			ouch = true;
-			eyeSprite.texture = eyeOuch;
+			eyeIndex = 11;
 			ouchCounter = 30;
 		}
 		else if(ouchCounter <= 0) {
 			ouch = false;
-			eyeSprite.texture = eye;
+			eyeIndex = 0;
 		} else {
 			ouchCounter -= 1;
 		}
@@ -224,48 +223,117 @@ public class StonePlayer implements Entity {
 
 	@Override
 	public void render(SpriteBatch batch) {
-
-		sprite.render(batch);
 		
 		
-		if(mouthScale < 0) {
-			mouthSprite.originY = mouthOffsetY - 20;
-		}
-		else {
+		mouthSprite.scaleY = mouthScale;
+		mouthShadowSprite.scaleY = 0;
+		if(Math.abs(mouthScale) < 0.2f) {
+			mouthSprite.scaleY = 0;
+			mouthShadowSprite.scaleY = 1f;
+			mouthShadowSprite.scaleX = 1f;
 			mouthSprite.originY = mouthOffsetY;
 		}
+		else {
+			
+			if(mouthScale < 0) {
+				mouthSprite.originY = mouthOffsetY - 20;
+			}
+			else {
+				mouthSprite.originY = mouthOffsetY;
+			}
+		}
+		
+		mouthShadowSprite.originY = mouthSprite.originY;
+		
 		
 		mouthSprite.x = sprite.x;
 		mouthSprite.y = sprite.y;
+		mouthShadowSprite.x = sprite.x;
+		mouthShadowSprite.y = sprite.y;
 		mouthSprite.rotation = sprite.rotation;
-		mouthSprite.scaleY = mouthScale;
-		mouthSprite.render(batch);
+		mouthShadowSprite.rotation = sprite.rotation;
 		
 		
+		
+		// Calculate Eye Positions
 		float relativeRotation = sprite.rotation + (90 - eyeAngle);
 		
-		eyeSprite.x = (float) (sprite.x + Math.cos(relativeRotation*Math.PI/180)*eyeDistance);
-		eyeSprite.y = (float) (sprite.y + Math.sin(relativeRotation*Math.PI/180)*eyeDistance);
-		
-		Vector2 eyePos = new Vector2(eyeSprite.x, eyeSprite.y);
-		eyeSprite.rotation = new Vector2(eyeTarget.x - eyePos.x, eyeTarget.y - eyePos.y).angle();
-		if(ouch) {
-			eyeSprite.rotation = sprite.rotation + 180;
-		}
-		eyeSprite.render(batch);
+		eyeRSprite.x = (float) (sprite.x + Math.cos(relativeRotation*Math.PI/180)*eyeDistance);
+		eyeRSprite.y = (float) (sprite.y + Math.sin(relativeRotation*Math.PI/180)*eyeDistance);
 		
 		relativeRotation += (90 - (relativeRotation - sprite.rotation))*2;
 		
-		eyeSprite.x = (float) (sprite.x + Math.cos(relativeRotation*Math.PI/180)*eyeDistance);
-		eyeSprite.y = (float) (sprite.y + Math.sin(relativeRotation*Math.PI/180)*eyeDistance);
-		
-		eyePos = new Vector2(eyeSprite.x, eyeSprite.y);
-		eyeSprite.rotation = new Vector2(eyeTarget.x - eyePos.x, eyeTarget.y - eyePos.y).angle();
+		eyeLSprite.x = (float) (sprite.x + Math.cos(relativeRotation*Math.PI/180)*eyeDistance);
+		eyeLSprite.y = (float) (sprite.y + Math.sin(relativeRotation*Math.PI/180)*eyeDistance);
 		
 		if(ouch) {
-			eyeSprite.rotation = sprite.rotation;
+			//Replace normal eyes with "ouch" eyes
+			eyeLSprite.texture = eyeL[11];
+			eyeRSprite.texture = eyeR[11];
+			eyeRSprite.rotation = sprite.rotation;
+			eyeLSprite.rotation = sprite.rotation;
 		}
-		eyeSprite.render(batch);
+		else {
+			eyeLSprite.texture = eyeL[0];
+			eyeRSprite.texture = eyeR[0];
+			
+			// Rotate Eyes
+			Vector2 eyePos = new Vector2(eyeRSprite.x, eyeRSprite.y);
+			eyeRSprite.rotation = new Vector2(eyeTarget.x - eyePos.x, eyeTarget.y - eyePos.y).angle();
+			
+			eyePos = new Vector2(eyeLSprite.x, eyeLSprite.y);
+			eyeLSprite.rotation = new Vector2(eyeTarget.x - eyePos.x, eyeTarget.y - eyePos.y).angle();
+		}
+		
+		
+		
+		
+		
+		browSprite.x = sprite.x;
+		browSprite.y = sprite.y;
+		browSprite.rotation = sprite.rotation;
+		
+		sprite.render(batch);
+		mouthShadowSprite.render(batch);
+		mouthSprite.render(batch);
+		eyeRSprite.render(batch);
+		eyeLSprite.render(batch);
+		//browSprite.render(batch);
+		
+	}
+	
+	public void loadFaceSprites() {
+		
+		for(int i = 0; i < mouth.length; i++) {
+			mouth[i] = new TextureRegion(game.assets.getTexture("face/mouth/" + "mouth" + toTwoDigitNum(i) + ".png"));
+		}
+		
+		for(int i = 0; i < brow.length; i++) {
+			brow[i] = new TextureRegion(game.assets.getTexture("face/brow/" + "brow" + toTwoDigitNum(i) + ".png"));
+		}
+		
+		for(int i = 0; i < eyeL.length; i++) {
+			eyeL[i] = new TextureRegion(game.assets.getTexture("face/eye/eyes" + toTwoDigitNum(i) + "L.png"));
+			eyeR[i] = new TextureRegion(game.assets.getTexture("face/eye/eyes" + toTwoDigitNum(i) + "R.png"));
+		}
+	}
+	
+	public String toTwoDigitNum(int n) {
+		
+		if(n < 0) {
+			n = -n;
+		}
+		
+		if(n >= 100) {
+			return (n % 100) + "";
+		}
+		else if(n < 10) {
+			return "0" + n;
+		}
+		else {
+			return "" + n;
+		}
+		
 		
 	}
 

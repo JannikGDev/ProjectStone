@@ -58,12 +58,12 @@ public class Plattform implements Entity {
 		
 		
 		if(hookable) {
-			TextureRegion earthNineSlice = new TextureRegion(game.assets.getTexture("earthNineSlice.png"));
-			shape = new NineSlice(game,earthNineSlice, 15,35,15,35, x, y , width, height);
+			TextureRegion earthNineSlice = new TextureRegion(game.assets.getTexture("earthSlice.png"));
+			shape = new NineSlice(game,earthNineSlice, 25,50,25,50, x, y , width, height);
 		}
 		else {
-			TextureRegion stoneNineSlice = new TextureRegion(game.assets.getTexture("stoneNineSlice.png"));
-			shape = new NineSlice(game,stoneNineSlice, 15,35,15,35, x, y , width, height);
+			TextureRegion stoneNineSlice = new TextureRegion(game.assets.getTexture("rockSlice.png"));
+			shape = new NineSlice(game,stoneNineSlice, 25,50,25,50, x, y , width, height);
 		}
 		
 		shape.rotation = rotation;

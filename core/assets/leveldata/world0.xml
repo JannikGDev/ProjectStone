@@ -2,7 +2,7 @@
 <level backdropOffset="0" width="3200" height="600">
 	
 	<lowerbound x="0"	y="0"/>
-	<upperbound x="3200" 	y="600"/>
+	<upperbound x="3200" 	y="700"/>
 	
 	<entry x="125" y="525" id="0"/>
 	<entry x="2500" y="400" id="1"/>
@@ -14,6 +14,7 @@
 	<plattform x="0" y="890" width="800" height="10" rotation="0" hookable="false"/>
 	
 	<plattform x="0" y="250" width="100" height="550" rotation="0" hookable="false"/>
+	<plattform x="0" y="590" width="1400" height="100" rotation="0" hookable="false"/>
 
 	<!--  Second Section -->
 	<plattform x="800"   y="0" width="100" height="300" rotation="0" hookable="false"/>
@@ -21,7 +22,6 @@
 	<plattform x="1150" y="500" width="100" height="300" rotation="0" hookable="true"/>
 
 	<plattform x="800" y="0" width="800" height="50" rotation="0" hookable="false"/>
-	<plattform x="800" y="590" width="800" height="10" rotation="0" hookable="false"/>
 
 	<windzone x="900" y="50" width="100" height="100" wind-x="-5" wind-y="40"   />
 	
@@ -30,11 +30,17 @@
 	<plattform x="2200" y="0" width="200" height="450" rotation="0" hookable="false"/>
 	
 	<windzone x="1800" y="100" width="400" height="500" wind-x="0" wind-y="8"   />
+	<plattform x="1500" y="590" width="2000" height="100" rotation="0" hookable="false"/>
+	<plattform x="1390" y="450" width="200" height="20" rotation="-5" hookable="false"/>
+	<plattform x="1390" y="450" width="20" height="150" rotation="0" hookable="false"/>
+	<windzone x="1400" y="450" width="100" height="200" wind-x="0" wind-y="20"   />
+	
+	<exit x="1400" y="600"  width="100" height="100" nextLevel="1" entry="0" id="0" />
 	
 	<!--  Fourth Section -->
-	<windzone x="2400" y="0" width="500" height="100" wind-x="50" wind-y="0"   />
+	<windzone x="2400" y="0" width="500" height="150" wind-x="50" wind-y="0"   />
 	<windzone x="3000" y="0" width="200" height="400" wind-x="0" wind-y="60"   />
-	<windzone x="2600" y="500" width="600" height="100" wind-x="-50" wind-y="0"   />
+	<windzone x="2600" y="450" width="600" height="100" wind-x="-50" wind-y="5"   />
 	
 	<plattform x="2800" y="300" width="50" height="50" rotation="0" hookable="true"/>
 </level>

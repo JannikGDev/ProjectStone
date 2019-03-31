@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level backdropOffset="0" width="1800" height="600">
+  
+	<lowerbound x="0"	y="-10"/>
+	<upperbound x="1800" 	y="600"/>
+  
+	<!-- Section 1 -->
+	<plattform x="0" y="0" width="100" height="300" rotation="0" hookable="false"/>
+	<plattform x="100" y="0" width="100" height="200" rotation="0" hookable="false"/>
+	<plattform x="200" y="0" width="1000" height="100" rotation="0" hookable="false"/>
+	<plattform x="20" y="110" width="300" height="100" rotation="-45" hookable="false"/>
+	
+	<!-- Section 2 -->
+	<plattform x="600" y="80" width="500" height="100" rotation="20" hookable="false"/>
+	<booster x="620" y="120" width="100" height="100" boost-x="40" boost-y="13"   />
+	
+	<!-- Section 2 -->
+	<plattform x="1050" y="0" width="400" height="250" rotation="0" hookable="false"/>
+  
+  
+	<entry x="50" y="330" id="0"/>
+  
+	<exit  x="1400" y="0" width="400" height="100" nextLevel="earth1" entry="0" id="0" />
+</level>

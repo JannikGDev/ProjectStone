@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level backdropOffset="0" width="3200" height="600">
+	
+	<lowerbound x="0"	y="0"/>
+	<upperbound x="3200" 	y="700"/>
+	
+	<entry x="125" y="525" id="0"/>
+</level>

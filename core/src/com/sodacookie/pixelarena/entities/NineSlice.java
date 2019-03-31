@@ -76,7 +76,7 @@ public class NineSlice implements Entity {
 		bottomleft = new TextureRegion(texture, 0, bottom, left, bottommargin);
 		bottommiddle = new TextureRegion(texture, left, bottom, centerW, bottommargin);
 		bottomright = new TextureRegion(texture, right, bottom,rightmargin, bottommargin);
-
+		
 	}
 
 	@Override

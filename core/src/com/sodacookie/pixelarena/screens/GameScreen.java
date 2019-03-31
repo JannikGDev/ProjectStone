@@ -37,9 +37,11 @@ import com.badlogic.gdx.physics.box2d.joints.RopeJointDef;
 import com.sodacookie.pixelarena.StoneGame;
 import com.sodacookie.pixelarena.entities.Background;
 import com.sodacookie.pixelarena.entities.Entity;
+import com.sodacookie.pixelarena.entities.Mover;
 import com.sodacookie.pixelarena.entities.StonePlayer;
-import com.sodacookie.pixelarena.entities.WindZone;
+import com.sodacookie.pixelarena.entities.Booster;
 import com.sodacookie.pixelarena.other.Exit;
+import com.sodacookie.pixelarena.other.PathElement;
 import com.sodacookie.pixelarena.entities.Plattform;
 import com.sodacookie.pixelarena.entities.RectangleShape;
 import com.sodacookie.pixelarena.entities.Rope;
@@ -55,7 +57,8 @@ public class GameScreen implements Screen {
 	StoneGame game;
 
 	List<Plattform> plattforms;
-	List<WindZone> windZones;
+	List<Mover> movers;
+	List<Booster> boosters;
 	List<Exit> exits;
 	StonePlayer player;
 
@@ -95,8 +98,9 @@ public class GameScreen implements Screen {
 		this.physicsCamera.setToOrtho(false, game.WIDTH / game.PHYSICS_ZOOM, game.HEIGHT / game.PHYSICS_ZOOM);
 
 		plattforms = new ArrayList<Plattform>();
-		windZones = new ArrayList<WindZone>();
+		boosters = new ArrayList<Booster>();
 		exits = new ArrayList<Exit>();
+		movers = new ArrayList<Mover>();
 
 		XmlReader levelParser = new XmlReader();
 
@@ -125,78 +129,18 @@ public class GameScreen implements Screen {
 		//LevelLeftWall
 		plattforms.add(new Plattform(game, lowerX - game.WIDTH, lowerY - levelHeight, game.WIDTH, levelHeight*3, 0, physicsWorld, false));
 
-		Array<Element> plattformList = levelData.getChildrenByName("plattform");
-
-		for (int i = 0; i < plattformList.size; i++) {
-
-			Element e = plattformList.get(i);
-
-			float x = e.getFloatAttribute("x");
-			float y = e.getFloatAttribute("y");
-			float width = e.getFloatAttribute("width");
-			float height = e.getFloatAttribute("height");
-			float rotation = e.getFloatAttribute("rotation");
-			boolean hookable = e.getBooleanAttribute("hookable");
-
-			plattforms.add(new Plattform(game, x, y, width, height, rotation, physicsWorld, hookable));
-
-		}
-
-		Array<Element> windZoneList = levelData.getChildrenByName("windzone");
-
-		for (int i = 0; i < windZoneList.size; i++) {
-
-			Element e = windZoneList.get(i);
-
-			float x = e.getFloatAttribute("x");
-			float y = e.getFloatAttribute("y");
-			float width = e.getFloatAttribute("width");
-			float height = e.getFloatAttribute("height");
-			float windX = e.getFloatAttribute("wind-x");
-			float windY = e.getFloatAttribute("wind-y");
-
-			windZones.add(new WindZone(game, x, y, width, height, new Vector2(windX, windY)));
-
-		}
-
-		Array<Element> entryList = levelData.getChildrenByName("entry");
-
-		for (int i = 0; i < entryList.size; i++) {
-
-			Element e = entryList.get(i);
-
-			float x = e.getFloatAttribute("x");
-			float y = e.getFloatAttribute("y");
-			int id = e.getIntAttribute("id");
-
-			if (id == entry) {
-				player = new StonePlayer(game, x, y, physicsWorld);
-			}
-		}
-
-		Array<Element> exitList = levelData.getChildrenByName("exit");
-
-		for (int i = 0; i < exitList.size; i++) {
-
-			Element e = exitList.get(i);
-
-			float x = e.getFloatAttribute("x");
-			float y = e.getFloatAttribute("y");
-			float width = e.getFloatAttribute("width");
-			float height = e.getFloatAttribute("height");
-			int id = e.getIntAttribute("id");
-			int nextLevel = e.getIntAttribute("nextLevel");
-			int nextEntry = e.getIntAttribute("entry");
-
-			exits.add(new Exit(x, y, width, height, id, nextLevel, nextEntry));
-		}
-
+		placePlattforms(levelData);
+		placeBoosters(levelData);
+		placeEntries(levelData);
+		placeExits(levelData);
+		placeMovers(levelData);
+	
 		player.body.setTransform(player.body.getTransform().getPosition(), this.playerRotation);
 		player.body.setAngularVelocity(this.playerRotationVelocity);
 		player.body.setLinearVelocity(this.playerVelocity);
 
 		background = new Background(this.game, backdropOffset);
-
+		
 	}
 
 	@Override
@@ -234,18 +178,24 @@ public class GameScreen implements Screen {
 				this.playerRotationVelocity = player.body.getAngularVelocity();
 				this.playerVelocity = player.body.getLinearVelocity();
 
-				game.switchScreen(new GameScreen("leveldata/level" + e.nextLevel + ".xml", e.entry));
+				game.switchScreen(new GameScreen("leveldata/" + e.nextLevel + ".xml", e.entry));
 			}
 		}
 
-		for (int i = 0; i < windZones.size(); i++) {
-			windZones.get(i).update(delta);
-			WindZone wind = windZones.get(i);
+		for (int i = 0; i < boosters.size(); i++) {
+			boosters.get(i).update(delta);
+			Booster wind = boosters.get(i);
 
-			if (wind.area.contains(playerBox.getCenter(new Vector2()))) {
-				player.body.applyForceToCenter(wind.wind, true);
+			if (wind.boostReady && wind.area.contains(playerBox.getCenter(new Vector2()))) {
+				player.body.applyForceToCenter(wind.direction.cpy().scl(10), true);
+				wind.boostReady = false;
+				wind.boostcounter = 0;
 			}
 
+		}
+		
+		for (int i = 0; i < movers.size(); i++) {
+			movers.get(i).update(delta);
 		}
 
 		if (Gdx.input.justTouched()) {
@@ -314,12 +264,16 @@ public class GameScreen implements Screen {
 
 		background.render(batch);
 
-		for (int i = 0; i < windZones.size(); i++) {
-			windZones.get(i).render(batch);
+		for (int i = 0; i < boosters.size(); i++) {
+			boosters.get(i).render(batch);
 		}
 
 		for (int i = 0; i < plattforms.size(); i++) {
 			plattforms.get(i).render(batch);
+		}
+		
+		for (int i = 0; i < movers.size(); i++) {
+			movers.get(i).render(batch);
 		}
 
 		if (rope != null) {
@@ -327,7 +281,7 @@ public class GameScreen implements Screen {
 		}
 
 		player.render(batch);
-
+		
 		//debugRenderer.render(physicsWorld, physicsCamera.combined);
 	}
 
@@ -335,5 +289,117 @@ public class GameScreen implements Screen {
 	public void dispose() {
 
 	}
+	
+	
+	private void placePlattforms(Element leveldata) {
+		
+		Array<Element> plattformList = leveldata.getChildrenByName("plattform");
 
+		for (int i = 0; i < plattformList.size; i++) {
+
+			Element e = plattformList.get(i);
+
+			float x = e.getFloatAttribute("x");
+			float y = e.getFloatAttribute("y");
+			float width = e.getFloatAttribute("width");
+			float height = e.getFloatAttribute("height");
+			float rotation = e.getFloatAttribute("rotation");
+			boolean hookable = e.getBooleanAttribute("hookable");
+
+			plattforms.add(new Plattform(game, x, y, width, height, rotation, physicsWorld, hookable));
+
+		}
+		
+	}
+	
+	private void placeBoosters(Element leveldata) {
+		
+		Array<Element> boosterList = leveldata.getChildrenByName("booster");
+
+		for (int i = 0; i < boosterList.size; i++) {
+
+			Element e = boosterList.get(i);
+
+			float x = e.getFloatAttribute("x");
+			float y = e.getFloatAttribute("y");
+			float width = e.getFloatAttribute("width");
+			float height = e.getFloatAttribute("height");
+			float windX = e.getFloatAttribute("boost-x");
+			float windY = e.getFloatAttribute("boost-y");
+
+			boosters.add(new Booster(game, x, y, width, height, new Vector2(windX, windY)));
+
+		}
+		
+	}
+	
+	private void placeEntries(Element leveldata) {
+		Array<Element> entryList = leveldata.getChildrenByName("entry");
+
+		for (int i = 0; i < entryList.size; i++) {
+
+			Element e = entryList.get(i);
+
+			float x = e.getFloatAttribute("x");
+			float y = e.getFloatAttribute("y");
+			int id = e.getIntAttribute("id");
+
+			if (id == entry) {
+				player = new StonePlayer(game, x, y, physicsWorld);
+			}
+		}
+	}
+	
+	private void placeExits(Element leveldata) {
+		Array<Element> exitList = leveldata.getChildrenByName("exit");
+
+		for (int i = 0; i < exitList.size; i++) {
+
+			Element e = exitList.get(i);
+
+			float x = e.getFloatAttribute("x");
+			float y = e.getFloatAttribute("y");
+			float width = e.getFloatAttribute("width");
+			float height = e.getFloatAttribute("height");
+			int id = e.getIntAttribute("id");
+			String nextLevel = e.getAttribute("nextLevel");
+			int nextEntry = e.getIntAttribute("entry");
+
+			exits.add(new Exit(x, y, width, height, id, nextLevel, nextEntry));
+		}
+	}
+	
+	private void placeMovers(Element leveldata) {
+		Array<Element> moversList = leveldata.getChildrenByName("mover");
+
+		for (int i = 0; i < moversList.size; i++) {
+
+			Element e = moversList.get(i);
+
+			float x = e.getFloatAttribute("x");
+			float y = e.getFloatAttribute("y");
+			float width = e.getFloatAttribute("width");
+			float height = e.getFloatAttribute("height");
+			float rotation = e.getFloatAttribute("rotation");
+			boolean bool = e.getBoolean("hookable");
+			
+			
+			List<PathElement> path = new ArrayList<PathElement>();
+			
+			Array<Element> pathElements = e.getChildrenByName("path");
+			for (int n = 0; n < pathElements.size; n++) {
+				Element p = pathElements.get(n);
+				
+				float pt = p.getFloatAttribute("time");
+				float px = p.getFloatAttribute("x");
+				float py = p.getFloatAttribute("y");
+				float pr = p.getFloatAttribute("rotation");
+				
+				path.add(new PathElement(pt,new Vector2(px, py), pr));
+			}
+			
+			Mover mover = new Mover(game, x, y,width,height,rotation,physicsWorld,bool,path);
+			movers.add(mover);
+		}
+	}
 }

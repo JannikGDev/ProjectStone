@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level backdropOffset="0" width="800" height="5000">
+  
+	<lowerbound x="0"	y="0"/>
+	<upperbound x="800" 	y="5000"/>
+	
+	<plattform x="-30" y="0" width="50" height="5000" rotation="0" hookable="false"/>
+	<plattform x="780" y="0" width="50" height="5000" rotation="0" hookable="false"/>
+	
+	<plattform x="0" y="400" width="500" height="50" rotation="0" hookable="true"/>
+	<plattform x="400" y="800" width="500" height="50" rotation="0" hookable="true"/>
+	<plattform x="0" y="1200" width="500" height="50" rotation="0" hookable="true"/>
+	
+	<booster x="350" y="20" width="100" height="100" boost-x="80" boost-y="0"   />
+	<booster x="350" y="420" width="100" height="100" boost-x="-80" boost-y="0"   />
+	<booster x="350" y="820" width="100" height="100" boost-x="80" boost-y="0"   />
+	
+	<entry x="50" y="50" id="0"/>
+	
+</level>

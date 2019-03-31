@@ -9,10 +9,10 @@ public class Exit {
 	public float x;
 	public float y;
 	public int id;
-	public int nextLevel;
+	public String nextLevel;
 	public int entry;
 	
-	public Exit(float x, float y, float width, float height, int id, int nextLevel, int entry) {
+	public Exit(float x, float y, float width, float height, int id, String nextLevel, int entry) {
 		
 		this.x = x;
 		this.y = y;
